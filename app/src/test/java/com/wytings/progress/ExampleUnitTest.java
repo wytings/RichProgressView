@@ -1,4 +1,4 @@
-package com.wytings.time;
+package com.wytings.progress;
 
 import org.junit.Test;
 
