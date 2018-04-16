@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.wytings.progress.R;
@@ -38,7 +39,8 @@ public class ScaleSeekBar extends View {
     final float roundRectRadius;
     final float dotPadding;
     final float dotRadius;
-    int currentNumber = 8;
+    int currentNumber = 1;
+    final float thumbRadius;
 
     public ScaleSeekBar(Context context) {
         this(context, null);
@@ -58,6 +60,7 @@ public class ScaleSeekBar extends View {
         roundRectRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, context.getResources().getDisplayMetrics());
         dotRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
         dotPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 9, context.getResources().getDisplayMetrics());
+        thumbRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, context.getResources().getDisplayMetrics());
         seekBarThumb = BitmapFactory.decodeResource(context.getResources(), R.drawable.seek_bar_thumb);
         maxHeight = Math.max(seekBarThumb.getHeight(), seekBarHeight) + textPadding + textSize;
         seekBarBackgroundColor = Color.parseColor("#1E2732");
@@ -102,24 +105,54 @@ public class ScaleSeekBar extends View {
         float interval = (seekBarRectF.width() - dotPadding * 2) / maxNumber;
         float centerY = seekBarRectF.centerY();
 
-        float currentDotCenterX = dotPadding + currentNumber * interval;
+        float currentDotCenterX = seekBarRectF.left + dotPadding + currentNumber * interval;
 
         if (currentNumber < 9) {
-            paint.reset();
-            paint.setColor(seekBarBackgroundColor);
+            resetPaint(seekBarBackgroundColor);
             tempRectF.set(seekBarRectF);
             tempRectF.left = currentDotCenterX;
             canvas.drawRoundRect(tempRectF, roundRectRadius, roundRectRadius, paint);
         }
 
-        paint.reset();
-        paint.setColor(Color.WHITE);
+        resetPaint(Color.WHITE);
         for (int i = 0; i < count; i++) {
-            canvas.drawCircle(dotPadding + i * interval, centerY, dotRadius, paint);
+            canvas.drawCircle(seekBarRectF.left + dotPadding + i * interval, centerY, dotRadius, paint);
         }
 
-        tempRectF.set(currentDotCenterX - 50, centerY - 50, currentDotCenterX + 50, centerY + 50);
+        tempRectF.set(currentDotCenterX - thumbRadius, centerY - thumbRadius,
+                currentDotCenterX + thumbRadius, centerY + thumbRadius);
+        tempRectF.offset(0, 6);
         canvas.drawBitmap(seekBarThumb, null, tempRectF, paint);
 
     }
+
+    private void resetPaint(int color) {
+        paint.reset();
+        paint.setAntiAlias(true);
+        paint.setColor(color);
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                return handleDownEvent(event);
+            case MotionEvent.ACTION_MOVE:
+                return handleMoveEvent(event);
+            default:
+                return super.onTouchEvent(event);
+        }
+
+    }
+
+
+    private boolean handleDownEvent(MotionEvent event) {
+        return false;
+    }
+
+    private boolean handleMoveEvent(MotionEvent event) {
+        return false;
+    }
+
 }
