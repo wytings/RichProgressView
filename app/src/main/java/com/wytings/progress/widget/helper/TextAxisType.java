@@ -1,4 +1,4 @@
-package com.wytings.progress;
+package com.wytings.progress.widget.helper;
 
 /**
  * Created by rex.wei on 2017/4/10.

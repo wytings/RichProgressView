@@ -1,4 +1,4 @@
-package com.wytings.progress;
+package com.wytings.progress.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,6 +10,9 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+
+import com.wytings.progress.widget.helper.GraphTextHelper;
+import com.wytings.progress.widget.helper.TextAxisType;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

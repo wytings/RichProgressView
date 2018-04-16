@@ -1,4 +1,4 @@
-package com.wytings.progress;
+package com.wytings.progress.widget.helper;
 
 import android.content.Context;
 import android.graphics.Canvas;
