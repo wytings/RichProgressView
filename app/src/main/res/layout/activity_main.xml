@@ -9,11 +9,19 @@
     <com.wytings.progress.widget.TimeProgressView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:background="@android:color/holo_red_light"
         android:paddingBottom="10dp"
         android:paddingEnd="15dp"
         android:paddingStart="15dp"
         android:paddingTop="18dp" />
+
+    <com.wytings.progress.widget.ScaleSeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:paddingEnd="15dp"
+        android:paddingStart="15dp" />
 
 </LinearLayout>
