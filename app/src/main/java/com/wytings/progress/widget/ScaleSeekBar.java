@@ -17,6 +17,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.wytings.progress.R;
+import com.wytings.progress.widget.helper.GraphTextHelper;
+import com.wytings.progress.widget.helper.TextAxisType;
 
 /**
  * Created by rex.wei on 2018/04/16 16:54.
@@ -41,6 +43,8 @@ public class ScaleSeekBar extends View {
     final float dotRadius;
     int currentNumber = 1;
     final float thumbRadius;
+    final GraphTextHelper textHelper;
+    String maxText = maxNumber + "倍";
 
     public ScaleSeekBar(Context context) {
         this(context, null);
@@ -53,16 +57,17 @@ public class ScaleSeekBar extends View {
     public ScaleSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        textHelper = new GraphTextHelper(context);
         paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         textSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 13, context.getResources().getDisplayMetrics());
         seekBarHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics());
-        textPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, context.getResources().getDisplayMetrics());
+        textPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 18, context.getResources().getDisplayMetrics());
         roundRectRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, context.getResources().getDisplayMetrics());
         dotRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
         dotPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 9, context.getResources().getDisplayMetrics());
         thumbRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, context.getResources().getDisplayMetrics());
         seekBarThumb = BitmapFactory.decodeResource(context.getResources(), R.drawable.seek_bar_thumb);
-        maxHeight = Math.max(seekBarThumb.getHeight(), seekBarHeight) + textPadding + textSize;
+        maxHeight = (int) (seekBarHeight + (thumbRadius - seekBarHeight / 2) + textPadding + textSize);
         seekBarBackgroundColor = Color.parseColor("#1E2732");
     }
 
@@ -77,7 +82,7 @@ public class ScaleSeekBar extends View {
                 , Color.parseColor("#499EF0")
                 , Shader.TileMode.CLAMP);
         seekBarRectF.set(getPaddingLeft(), getPaddingTop(), w - getPaddingRight(), h - getPaddingBottom());
-        int extraDistance = seekBarThumb.getHeight() / 2 - seekBarHeight / 2;
+        int extraDistance = (int) (thumbRadius - seekBarHeight / 2);
         seekBarRectF.top += extraDistance;
         seekBarRectF.bottom = seekBarRectF.top + seekBarHeight;
 
@@ -98,6 +103,17 @@ public class ScaleSeekBar extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        drawSeekBar(canvas);
+        drawText(canvas);
+
+    }
+
+    private void drawText(Canvas canvas) {
+        textHelper.drawText(canvas, "0", textSize, Color.GRAY, seekBarRectF.left, seekBarRectF.top + textPadding, TextAxisType.LEFT_TOP);
+        textHelper.drawText(canvas, maxText, textSize, Color.GRAY, seekBarRectF.right, seekBarRectF.top + textPadding, TextAxisType.RIGHT_TOP);
+    }
+
+    private void drawSeekBar(Canvas canvas) {
         paint.setShader(blueLinearGradient);
         canvas.drawRoundRect(seekBarRectF, roundRectRadius, roundRectRadius, paint);
 
@@ -123,7 +139,6 @@ public class ScaleSeekBar extends View {
                 currentDotCenterX + thumbRadius, centerY + thumbRadius);
         tempRectF.offset(0, 6);
         canvas.drawBitmap(seekBarThumb, null, tempRectF, paint);
-
     }
 
     private void resetPaint(int color) {
@@ -146,13 +161,40 @@ public class ScaleSeekBar extends View {
 
     }
 
+    private int getClickNumber(MotionEvent event) {
+        float interval = (seekBarRectF.width() - dotPadding * 2) / maxNumber;
+        return (int) ((event.getX() - seekBarRectF.left - dotPadding) / interval + 0.5f);
+    }
 
-    private boolean handleDownEvent(MotionEvent event) {
+    private boolean postTargetNumber(int number) {
+        if (number < 0) {
+            number = 0;
+        } else if (number > maxNumber) {
+            number = maxNumber;
+        }
+
+        if (number != currentNumber) {
+            currentNumber = number;
+            invalidate();
+            return true;
+        }
+
         return false;
     }
 
+    private boolean handleDownEvent(MotionEvent event) {
+        tempRectF.set(seekBarRectF);
+        tempRectF.inset(-100, -100);
+        if (tempRectF.contains(event.getX(), event.getY())) {
+            postTargetNumber(getClickNumber(event));
+            return true;
+        }
+        return super.onTouchEvent(event);
+    }
+
     private boolean handleMoveEvent(MotionEvent event) {
-        return false;
+        postTargetNumber(getClickNumber(event));
+        return super.onTouchEvent(event);
     }
 
 }
