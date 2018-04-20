@@ -66,7 +66,7 @@ public class MarkSeekBar extends View {
         dotRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
         dotPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 9, context.getResources().getDisplayMetrics());
         thumbRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, context.getResources().getDisplayMetrics());
-        seekBarThumb = BitmapFactory.decodeResource(context.getResources(), R.drawable.seek_bar_thumb);
+        seekBarThumb = BitmapFactory.decodeResource(context.getResources(), R.drawable.seek_bar_slider_thumb);
         maxHeight = (int) (seekBarHeight + (thumbRadius - seekBarHeight / 2) + textPadding + textSize);
         seekBarBackgroundColor = Color.parseColor("#1E2732");
     }
@@ -137,7 +137,6 @@ public class MarkSeekBar extends View {
 
         tempRectF.set(currentDotCenterX - thumbRadius, centerY - thumbRadius,
                 currentDotCenterX + thumbRadius, centerY + thumbRadius);
-        tempRectF.offset(0, 6);
         canvas.drawBitmap(seekBarThumb, null, tempRectF, paint);
     }
 
