@@ -25,7 +25,7 @@ import com.wytings.progress.widget.helper.TextAxisType;
  *
  * @author rex.wei@yff.com
  */
-public class ScaleSeekBar extends View {
+public class MarkSeekBar extends View {
 
     LinearGradient blueLinearGradient;
     final int seekBarHeight;
@@ -46,15 +46,15 @@ public class ScaleSeekBar extends View {
     final GraphTextHelper textHelper;
     String maxText = maxNumber + "倍";
 
-    public ScaleSeekBar(Context context) {
+    public MarkSeekBar(Context context) {
         this(context, null);
     }
 
-    public ScaleSeekBar(Context context, @Nullable AttributeSet attrs) {
+    public MarkSeekBar(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ScaleSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MarkSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         textHelper = new GraphTextHelper(context);
