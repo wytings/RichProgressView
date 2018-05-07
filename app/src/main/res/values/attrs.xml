@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TimeProgressView">
+        <attr name="time_progress_desc_text_size" format="dimension" />
+        <attr name="time_progress_time_text_size" format="dimension" />
+        <attr name="time_progress_dot_top_padding" format="dimension" />
+        <attr name="time_progress_dot_bottom_padding" format="dimension" />
+        <attr name="time_progress_dot_horizontal_padding" format="dimension" />
+        <attr name="time_progress_dot_radius" format="dimension" />
+        <attr name="time_progress_line_height" format="dimension" />
+        <attr name="time_progress_desc_bright_color" format="color" />
+        <attr name="time_progress_desc_dark_color" format="color" />
+        <attr name="time_progress_time_bright_color" format="color" />
+        <attr name="time_progress_time_dark_color" format="color" />
+        <attr name="time_progress_line_bright_color" format="color" />
+        <attr name="time_progress_line_dark_color" format="color" />
+        <attr name="time_progress_dot_bright_color" format="color" />
+        <attr name="time_progress_dot_dark_color" format="color" />
+    </declare-styleable>
+
+</resources>

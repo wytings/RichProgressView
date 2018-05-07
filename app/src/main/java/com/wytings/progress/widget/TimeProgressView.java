@@ -1,19 +1,23 @@
 package com.wytings.progress.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
+import com.wytings.progress.R;
 import com.wytings.progress.widget.helper.GraphTextHelper;
 import com.wytings.progress.widget.helper.TextAxisType;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +43,9 @@ public class TimeProgressView extends View {
     final RectF tempRectF = new RectF();
     final List<TimeData> dataList = new ArrayList<>();
     final GraphTextHelper textHelper;
+    long currentTimestamp = System.currentTimeMillis();
     int descTextSize, timeTextSize, dotTopPadding, dotBottomPadding, dotHorizontalPadding, dotRadius, lineHeight;
+    int descBrightColor, descDarkColor, timeBrightColor, timeDarkColor, lineBrightColor, lineDarkColor, dotBrightColor, dotDarkColor;
 
     public TimeProgressView(Context context) {
         this(context, null);
@@ -51,6 +57,7 @@ public class TimeProgressView extends View {
 
     public TimeProgressView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
         descTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13, context.getResources().getDisplayMetrics());
         timeTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, context.getResources().getDisplayMetrics());
         dotTopPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, context.getResources().getDisplayMetrics());
@@ -58,12 +65,54 @@ public class TimeProgressView extends View {
         dotHorizontalPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, context.getResources().getDisplayMetrics());
         dotRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, context.getResources().getDisplayMetrics());
         lineHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
-        dataList.addAll(getTestData());
+
+        descBrightColor = ContextCompat.getColor(context, R.color.white_color_100);
+        descDarkColor = ContextCompat.getColor(context, R.color.white_color_30);
+        timeBrightColor = ContextCompat.getColor(context, R.color.white_color_50);
+        timeDarkColor = ContextCompat.getColor(context, R.color.white_color_30);
+        lineBrightColor = ContextCompat.getColor(context, R.color.time_progress_bright);
+        lineDarkColor = ContextCompat.getColor(context, R.color.white_color_10);
+        dotBrightColor = ContextCompat.getColor(context, R.color.blue);
+        dotDarkColor = ContextCompat.getColor(context, R.color.time_progress_dot_dark);
+
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TimeProgressView);
+        descTextSize = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_desc_text_size, descTextSize);
+        timeTextSize = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_time_text_size, timeTextSize);
+        dotTopPadding = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_dot_top_padding, dotTopPadding);
+        dotBottomPadding = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_dot_bottom_padding, dotBottomPadding);
+        dotHorizontalPadding = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_dot_horizontal_padding, dotHorizontalPadding);
+        dotRadius = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_dot_radius, dotRadius);
+        lineHeight = typedArray.getDimensionPixelSize(R.styleable.TimeProgressView_time_progress_line_height, lineHeight);
+
+        descBrightColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_desc_bright_color, descBrightColor);
+        descDarkColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_desc_dark_color, descDarkColor);
+        timeBrightColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_time_bright_color, timeBrightColor);
+        timeDarkColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_time_dark_color, timeDarkColor);
+        lineBrightColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_line_bright_color, lineBrightColor);
+        lineDarkColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_line_dark_color, lineDarkColor);
+        dotBrightColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_dot_bright_color, dotBrightColor);
+        dotDarkColor = typedArray.getColor(R.styleable.TimeProgressView_time_progress_dot_dark_color, dotDarkColor);
+        typedArray.recycle();
+
+        if (isInEditMode()) {
+            dataList.addAll(getTestData());
+        }
 
         textHelper = new GraphTextHelper(context);
         paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         paint.setTextSize(timeTextSize);
         singleWidth = paint.measureText("yyyy-MM-dd");
+    }
+
+    public void setDataList(String currentTime, List<TimeData> list) {
+        this.dataList.clear();
+        this.dataList.addAll(list);
+        this.currentTimestamp = formatDate(currentTime);
+    }
+
+    public void setCurrentTime(String currentTime) {
+        this.currentTimestamp = formatDate(currentTime);
+        invalidate();
     }
 
     @Override
@@ -128,21 +177,21 @@ public class TimeProgressView extends View {
             tempRectF.right = next.dotCenterX - dotRadius - dotHorizontalPadding;
             tempRectF.bottom = centerY + halfLineHeight;
 
-            long currentTime = System.currentTimeMillis();
-            if (currentTime < data.timestamp) {
-                paint.setColor(Color.GRAY);
+
+            if (currentTimestamp < data.timestamp) {
+                paint.setColor(lineDarkColor);
                 canvas.drawRect(tempRectF, paint);
-            } else if (data.timestamp <= currentTime && currentTime < next.timestamp) {
-                paint.setColor(Color.GRAY);
+            } else if (data.timestamp <= currentTimestamp && currentTimestamp < next.timestamp) {
+                paint.setColor(lineDarkColor);
                 canvas.drawRect(tempRectF, paint);
 
-                float percent = 1.0f * (System.currentTimeMillis() - data.timestamp) / (next.timestamp - data.timestamp);
+                float percent = 1.0f * (currentTimestamp - data.timestamp) / (next.timestamp - data.timestamp);
                 tempRectF.right = (int) (tempRectF.left + tempRectF.width() * percent);
 
-                paint.setColor(Color.BLUE);
+                paint.setColor(lineBrightColor);
                 canvas.drawRect(tempRectF, paint);
             } else {
-                paint.setColor(Color.BLUE);
+                paint.setColor(lineBrightColor);
                 canvas.drawRect(tempRectF, paint);
             }
 
@@ -179,27 +228,30 @@ public class TimeProgressView extends View {
     }
 
     private void drawSingleTimeBlock(TimeData data, float anchorX, int positionType, Canvas canvas) {
+        final boolean isBright = currentTimestamp >= data.timestamp;
+        final int timeColor = isBright ? timeBrightColor : timeDarkColor;
+        final int descColor = isBright ? descBrightColor : descDarkColor;
         float dotCenterX = anchorX;
         switch (positionType) {
             case POSITION_LEFT:
                 dotCenterX += dotRadius;
-                textHelper.drawText(canvas, data.timeString, timeTextSize, Color.WHITE, anchorX, canvasRectF.bottom, TextAxisType.LEFT_BOTTOM);
-                textHelper.drawText(canvas, data.desc, descTextSize, Color.WHITE, anchorX, canvasRectF.top, TextAxisType.LEFT_TOP);
+                textHelper.drawText(canvas, data.desc, descTextSize, descColor, anchorX, canvasRectF.top, TextAxisType.LEFT_TOP);
+                textHelper.drawText(canvas, data.timeString, timeTextSize, timeColor, anchorX, canvasRectF.bottom, TextAxisType.LEFT_BOTTOM);
                 break;
 
             case POSITION_RIGHT:
                 dotCenterX -= dotRadius;
-                textHelper.drawText(canvas, data.desc, descTextSize, Color.WHITE, anchorX, canvasRectF.top, TextAxisType.RIGHT_TOP);
-                textHelper.drawText(canvas, data.timeString, timeTextSize, Color.WHITE, anchorX, canvasRectF.bottom, TextAxisType.RIGHT_BOTTOM);
+                textHelper.drawText(canvas, data.desc, descTextSize, descColor, anchorX, canvasRectF.top, TextAxisType.RIGHT_TOP);
+                textHelper.drawText(canvas, data.timeString, timeTextSize, timeColor, anchorX, canvasRectF.bottom, TextAxisType.RIGHT_BOTTOM);
                 break;
 
             case POSITION_MIDDLE:
-                textHelper.drawText(canvas, data.desc, descTextSize, Color.WHITE, anchorX, canvasRectF.top, TextAxisType.CENTER_TOP);
-                textHelper.drawText(canvas, data.timeString, timeTextSize, Color.WHITE, anchorX, canvasRectF.bottom, TextAxisType.CENTER_BOTTOM);
+                textHelper.drawText(canvas, data.desc, descTextSize, descColor, anchorX, canvasRectF.top, TextAxisType.CENTER_TOP);
+                textHelper.drawText(canvas, data.timeString, timeTextSize, timeColor, anchorX, canvasRectF.bottom, TextAxisType.CENTER_BOTTOM);
                 break;
         }
 
-        paint.setColor(System.currentTimeMillis() >= data.timestamp ? Color.BLUE : Color.GRAY);
+        paint.setColor(isBright ? dotBrightColor : dotDarkColor);
         canvas.drawCircle(dotCenterX, lineCenterY(), dotRadius, paint);
         data.dotCenterX = dotCenterX;
     }
@@ -208,13 +260,26 @@ public class TimeProgressView extends View {
         return (int) (canvasRectF.top + descTextSize + dotTopPadding + dotRadius);
     }
 
-    public Collection<? extends TimeData> getTestData() {
+    Collection<? extends TimeData> getTestData() {
         List<TimeData> list = new LinkedList<>();
-        list.add(new TimeData(System.currentTimeMillis() - 10 * 24 * 60 * 60 * 1000L, "醒来"));
-        list.add(new TimeData(System.currentTimeMillis() + 10 * 24 * 60 * 60 * 1000L, "下床"));
-        list.add(new TimeData(System.currentTimeMillis() + 30 * 24 * 60 * 60 * 1000L, "洗漱"));
-        list.add(new TimeData(System.currentTimeMillis() + 40 * 24 * 60 * 60 * 1000L, "出门"));
+        list.add(new TimeData("2018-01-27", "WakeWake"));
+        list.add(new TimeData("2018-02-27", "BedBed"));
+        list.add(new TimeData("2018-03-27", "WashWash"));
+        list.add(new TimeData("2018-04-27", "OutOut"));
         return list;
+    }
+
+
+    private static long formatDate(String times) {
+        long dateTime = 0;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            Date date = format.parse(times);
+            dateTime = date.getTime();
+        } catch (ParseException e) {
+            Log.e("TimeProgressView", "fail to format date, error = " + e);
+        }
+        return dateTime;
     }
 
     public static class TimeData {
@@ -223,14 +288,10 @@ public class TimeProgressView extends View {
         final String desc;
         float dotCenterX;
 
-        TimeData(long timestamp, String desc) {
-            this.timestamp = timestamp;
+        public TimeData(String timeString, String desc) {
+            this.timeString = timeString;
             this.desc = desc;
-            if (timestamp <= 0) {
-                this.timeString = "--";
-            } else {
-                this.timeString = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(timestamp));
-            }
+            this.timestamp = formatDate(timeString);
         }
     }
 

@@ -1,27 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.wytings.progress.widget.TimeProgressView
+    <TextView
+        android:id="@+id/current_time_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:background="@android:color/holo_red_light"
+        android:gravity="center"
+        android:padding="10dp"
+        tools:text="2018-05-07" />
+
+    <com.wytings.progress.widget.TimeProgressView
+        android:id="@+id/time_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black_bg"
         android:paddingBottom="10dp"
         android:paddingEnd="15dp"
         android:paddingStart="15dp"
         android:paddingTop="18dp" />
 
+    <Button
+        android:id="@+id/change_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:text="change current time"
+        android:textAllCaps="false" />
+
+    <TextView
+        android:id="@+id/progress_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp"
+        tools:text="1.0" />
+
     <com.wytings.progress.widget.MarkSeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:background="@color/black_bg"
         android:paddingEnd="15dp"
         android:paddingStart="15dp" />
+
+    <Button
+        android:id="@+id/change_seek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="change seek bar"
+        android:textAllCaps="false" />
 
 </LinearLayout>
