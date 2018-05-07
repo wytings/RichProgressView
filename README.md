@@ -1,2 +1,5 @@
 # TimeProgressView
-a time progress view
+a special time progress view
+
+## Sample GIF
+![DEMO_GIF](./demo.gif)
