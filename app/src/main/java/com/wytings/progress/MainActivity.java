@@ -2,7 +2,6 @@ package com.wytings.progress;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,8 +9,8 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
-import com.wytings.progress.widget.MarkSeekBar;
-import com.wytings.progress.widget.TimeProgressView;
+import com.wytings.progress.widget.SpecialSeekBar;
+import com.wytings.progress.widget.TimeMarkView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final TextView currentTimeValue = findViewById(R.id.current_time_value);
-        final TimeProgressView progressView = findViewById(R.id.time_progress);
+        final TimeMarkView progressView = findViewById(R.id.time_progress);
         progressView.setDataList(getTime(0), getTimeData());
         findViewById(R.id.change_time).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,10 +50,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final TextView progressValue = findViewById(R.id.progress_value);
-        final MarkSeekBar markSeekBar = findViewById(R.id.seekBar);
+        final SpecialSeekBar markSeekBar = findViewById(R.id.seekBar);
         markSeekBar.setMaxNumber(10);
         markSeekBar.setCurrentNumber(5);
-        markSeekBar.setNumberChangeListener(new MarkSeekBar.OnNumberChangeListener() {
+        markSeekBar.setChangeListener(new SpecialSeekBar.OnSeekChangeListener() {
             @Override
             public void onChange(float number) {
                 progressValue.setText(String.valueOf(number));
@@ -83,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
         return this;
     }
 
-    public List<TimeProgressView.TimeData> getTimeData() {
-        List<TimeProgressView.TimeData> list = new LinkedList<>();
-        list.add(new TimeProgressView.TimeData(getTime(-1), "WakeWake"));
-        list.add(new TimeProgressView.TimeData(getTime(0), "BedBed"));
-        list.add(new TimeProgressView.TimeData(getTime(1), "WashWash"));
-        list.add(new TimeProgressView.TimeData(getTime(2), "OutOut"));
+    public List<TimeMarkView.MarkData> getTimeData() {
+        List<TimeMarkView.MarkData> list = new LinkedList<>();
+        list.add(new TimeMarkView.MarkData(getTime(-1), "WakeWake"));
+        list.add(new TimeMarkView.MarkData(getTime(0), "BedBed"));
+        list.add(new TimeMarkView.MarkData(getTime(1), "WashWash"));
+        list.add(new TimeMarkView.MarkData(getTime(2), "OutOut"));
         return list;
     }
 

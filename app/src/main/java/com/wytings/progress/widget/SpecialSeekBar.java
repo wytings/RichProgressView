@@ -12,76 +12,73 @@ import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.wytings.progress.R;
-import com.wytings.progress.widget.helper.GraphTextHelper;
-import com.wytings.progress.widget.helper.TextAxisType;
+import com.wytings.progress.widget.helper.TextHelper;
+import com.wytings.progress.widget.helper.TextDrawType;
 
 import java.util.Locale;
 
 /**
- * Created by rex.wei on 2018/04/16 16:54.
+ * Created on 2018/04/16 16:54.
  *
- * @author rex.wei@yff.com
+ * @author wytings
  */
-public class MarkSeekBar extends View {
+public class SpecialSeekBar extends View {
 
-    private static final String TAG = MarkSeekBar.class.getSimpleName();
-
-    public static abstract class OnNumberChangeListener {
+    public static abstract class OnSeekChangeListener {
         public abstract void onChange(float number);
 
-        public void onUp() {
+        public void onCancel() {
 
         }
     }
 
-    LinearGradient blueLinearGradient;
-    final int seekBarHeight;
-    final Bitmap seekBarThumb;
+    LinearGradient linearGradient;
+    final int barHeight;
+    final Bitmap dotThumb;
     final int maxHeight;
     final int textSize;
     final int textPadding;
     final int seekBarBackgroundColor;
-    final TextPaint paint;
-    final RectF seekBarRectF = new RectF();
-    final RectF tempRectF = new RectF();
+    final TextPaint textPaint;
+    final RectF barRectF = new RectF();
+    final RectF temporaryRectF = new RectF();
     final float roundRectRadius;
     final float dotPadding;
     final float dotRadius;
     final float thumbRadius;
-    final GraphTextHelper textHelper;
+    final TextHelper textHelper;
     float currentNumber = -1;
     float maxNumber = -1;
-    String maxText = "";
-    OnNumberChangeListener numberChangeListener;
+    String maxNumberText = "";
+    OnSeekChangeListener changeListener;
 
-    public MarkSeekBar(Context context) {
+    public SpecialSeekBar(Context context) {
         this(context, null);
     }
 
-    public MarkSeekBar(Context context, @Nullable AttributeSet attrs) {
+    public SpecialSeekBar(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MarkSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public SpecialSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        textHelper = new GraphTextHelper(context);
-        paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        textHelper = new TextHelper();
+        textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         textSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 13, context.getResources().getDisplayMetrics());
-        seekBarHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics());
+        barHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics());
         textPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 18, context.getResources().getDisplayMetrics());
         roundRectRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, context.getResources().getDisplayMetrics());
         dotRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
         dotPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 9, context.getResources().getDisplayMetrics());
         thumbRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 11, context.getResources().getDisplayMetrics());
-        seekBarThumb = BitmapFactory.decodeResource(context.getResources(), R.drawable.seek_bar_slider_thumb);
-        maxHeight = (int) (seekBarHeight + (thumbRadius - seekBarHeight / 2) + textPadding + textSize);
+        dotThumb = BitmapFactory.decodeResource(context.getResources(), R.drawable.seek_bar_slider_thumb);
+        maxHeight = (int) (barHeight + (thumbRadius - barHeight / 2) + textPadding + textSize);
         seekBarBackgroundColor = Color.parseColor("#1E2732");
 
         if (isInEditMode()) {
@@ -91,8 +88,8 @@ public class MarkSeekBar extends View {
 
     }
 
-    public void setNumberChangeListener(OnNumberChangeListener numberChangeListener) {
-        this.numberChangeListener = numberChangeListener;
+    public void setChangeListener(OnSeekChangeListener changeListener) {
+        this.changeListener = changeListener;
     }
 
     public void setCurrentNumber(float currentNumber) {
@@ -110,7 +107,7 @@ public class MarkSeekBar extends View {
 
     public void setMaxNumber(float maxNumber) {
         this.maxNumber = maxNumber;
-        this.maxText = String.format(Locale.getDefault(), "%.1f packets", maxNumber);
+        this.maxNumberText = String.format(Locale.getDefault(), "%.1f packets", maxNumber);
         invalidate();
         if (currentNumber > maxNumber) {
             currentNumber = maxNumber / 2;
@@ -120,28 +117,30 @@ public class MarkSeekBar extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        blueLinearGradient = new LinearGradient(getPaddingLeft()
+        linearGradient = new LinearGradient(getPaddingLeft()
                 , getPaddingTop()
                 , w - getPaddingRight()
                 , getPaddingTop()
                 , Color.parseColor("#80CDF9")
                 , Color.parseColor("#499EF0")
                 , Shader.TileMode.CLAMP);
-        seekBarRectF.set(getPaddingLeft(), getPaddingTop(), w - getPaddingRight(), h - getPaddingBottom());
-        int verticalExtraDistance = (int) (thumbRadius - seekBarHeight / 2);
-        seekBarRectF.top += verticalExtraDistance;
-        seekBarRectF.bottom = seekBarRectF.top + seekBarHeight;
+        barRectF.set(getPaddingLeft(), getPaddingTop(), w - getPaddingRight(), h - getPaddingBottom());
+        int verticalExtraDistance = (int) (thumbRadius - barHeight / 2);
+        barRectF.top += verticalExtraDistance;
+        barRectF.bottom = barRectF.top + barHeight;
 
         int horizontalExtraDistance = (int) (thumbRadius - dotPadding);
-        seekBarRectF.inset(horizontalExtraDistance, 0);
+        barRectF.inset(horizontalExtraDistance, 0);
 
 
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
         final int specMode = MeasureSpec.getMode(heightMeasureSpec);
         final int height;
+
         if (specMode == MeasureSpec.EXACTLY) {
             height = MeasureSpec.getSize(heightMeasureSpec);
         } else {
@@ -159,51 +158,64 @@ public class MarkSeekBar extends View {
     }
 
     private void drawText(Canvas canvas) {
-        textHelper.drawText(canvas, "0", textSize, Color.GRAY, seekBarRectF.left, seekBarRectF.top + textPadding, TextAxisType.LEFT_TOP);
-        textHelper.drawText(canvas, maxText, textSize, Color.GRAY, seekBarRectF.right, seekBarRectF.top + textPadding, TextAxisType.RIGHT_TOP);
+        textHelper.drawText(canvas,
+                "0",
+                textSize,
+                Color.GRAY,
+                barRectF.left, barRectF.top + textPadding,
+                TextDrawType.LEFT_TOP);
+
+        textHelper.drawText(canvas,
+                maxNumberText,
+                textSize,
+                Color.GRAY,
+                barRectF.right, barRectF.top + textPadding,
+                TextDrawType.RIGHT_TOP);
     }
 
     private void drawSeekBar(Canvas canvas) {
-        paint.setShader(blueLinearGradient);
-        canvas.drawRoundRect(seekBarRectF, roundRectRadius, roundRectRadius, paint);
 
-        int currentIntNumber = ceilNumber(currentNumber);
-        int maxIntNumber = ceilNumber(maxNumber);
+        textPaint.setShader(linearGradient);
+
+        canvas.drawRoundRect(barRectF, roundRectRadius, roundRectRadius, textPaint);
+
+        int currentIntNumber = getMaxInt(currentNumber);
+        int maxIntNumber = getMaxInt(maxNumber);
         int count = maxIntNumber + 1;
-        float interval = (seekBarRectF.width() - dotPadding * 2) / maxIntNumber;
-        float centerY = seekBarRectF.centerY();
+        float interval = (barRectF.width() - dotPadding * 2) / maxIntNumber;
+        float centerY = barRectF.centerY();
 
-        float currentDotCenterX = seekBarRectF.left + dotPadding + currentIntNumber * interval;
+        float currentDotCenterX = barRectF.left + dotPadding + currentIntNumber * interval;
 
         if (currentIntNumber < maxIntNumber) {
             resetPaint(seekBarBackgroundColor);
-            tempRectF.set(seekBarRectF);
-            tempRectF.left = currentDotCenterX;
-            canvas.drawRoundRect(tempRectF, roundRectRadius, roundRectRadius, paint);
+            temporaryRectF.set(barRectF);
+            temporaryRectF.left = currentDotCenterX;
+            canvas.drawRoundRect(temporaryRectF, roundRectRadius, roundRectRadius, textPaint);
         }
 
         resetPaint(Color.WHITE);
         for (int i = 0; i < count; i++) {
-            canvas.drawCircle(seekBarRectF.left + dotPadding + i * interval, centerY, dotRadius, paint);
+            canvas.drawCircle(barRectF.left + dotPadding + i * interval, centerY, dotRadius, textPaint);
         }
 
-        canvas.drawBitmap(seekBarThumb, null, getDotRectF(currentDotCenterX, centerY), paint);
+        canvas.drawBitmap(dotThumb, null, getDotRectF(currentDotCenterX, centerY), textPaint);
     }
 
-    private int ceilNumber(float number) {
+    private int getMaxInt(float number) {
         return (int) Math.ceil(number);
     }
 
     private RectF getDotRectF(float currentDotCenterX, float centerY) {
-        tempRectF.set(currentDotCenterX - thumbRadius, centerY - thumbRadius,
+        temporaryRectF.set(currentDotCenterX - thumbRadius, centerY - thumbRadius,
                 currentDotCenterX + thumbRadius, centerY + thumbRadius);
-        return tempRectF;
+        return temporaryRectF;
     }
 
     private void resetPaint(int color) {
-        paint.reset();
-        paint.setAntiAlias(true);
-        paint.setColor(color);
+        textPaint.reset();
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(color);
     }
 
 
@@ -211,20 +223,20 @@ public class MarkSeekBar extends View {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                tempRectF.set(seekBarRectF);
-                tempRectF.inset(-100, -100);
-                if (tempRectF.contains(event.getX(), event.getY())) {
+                temporaryRectF.set(barRectF);
+                temporaryRectF.inset(-100, -100);
+                if (temporaryRectF.contains(event.getX(), event.getY())) {
                     getParent().requestDisallowInterceptTouchEvent(true);
-                    postTargetNumber(getClickNumber(event));
+                    dispatchTargetNumber(getFixedClickNumber(event));
                     return true;
                 }
                 return super.onTouchEvent(event);
             case MotionEvent.ACTION_MOVE:
-                postTargetNumber(getClickNumber(event));
+                dispatchTargetNumber(getFixedClickNumber(event));
                 return true;
             default:
-                if (numberChangeListener != null) {
-                    numberChangeListener.onUp();
+                if (changeListener != null) {
+                    changeListener.onCancel();
                 }
                 getParent().requestDisallowInterceptTouchEvent(false);
                 return super.onTouchEvent(event);
@@ -232,15 +244,14 @@ public class MarkSeekBar extends View {
 
     }
 
-    private int getClickNumber(MotionEvent event) {
-        float interval = (seekBarRectF.width() - dotPadding * 2) / ceilNumber(maxNumber);
-        float number = (event.getX() - seekBarRectF.left - dotPadding) / interval + 0.5f;
+    private int getFixedClickNumber(MotionEvent event) {
+        float interval = (barRectF.width() - dotPadding * 2) / getMaxInt(maxNumber);
+        float number = (event.getX() - barRectF.left - dotPadding) / interval + 0.5f;
         return (int) number;
     }
 
-    private boolean postTargetNumber(int number) {
-        int maxInt = ceilNumber(maxNumber);
-        Log.i(TAG, "number = " + number + ", maxInt = " + maxInt);
+    private boolean dispatchTargetNumber(int number) {
+        int maxInt = getMaxInt(maxNumber);
 
         if (number < 0) {
             number = 0;
@@ -248,11 +259,11 @@ public class MarkSeekBar extends View {
             number = maxInt;
         }
 
-        int currentIntNumber = ceilNumber(currentNumber);
+        int currentIntNumber = getMaxInt(currentNumber);
         if (number != currentIntNumber) {
             currentNumber = number == maxInt ? maxNumber : number;
-            if (numberChangeListener != null) {
-                numberChangeListener.onChange(currentNumber);
+            if (changeListener != null) {
+                changeListener.onChange(currentNumber);
             }
             invalidate();
             return true;

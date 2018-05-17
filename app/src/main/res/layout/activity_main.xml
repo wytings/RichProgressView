@@ -13,7 +13,7 @@
         android:padding="10dp"
         tools:text="2018-05-07" />
 
-    <com.wytings.progress.widget.TimeProgressView
+    <com.wytings.progress.widget.TimeMarkView
         android:id="@+id/time_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         android:padding="10dp"
         tools:text="1.0" />
 
-    <com.wytings.progress.widget.MarkSeekBar
+    <com.wytings.progress.widget.SpecialSeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
